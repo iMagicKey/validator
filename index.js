@@ -11,7 +11,7 @@ class Validator {
         return this
     }
 
-    isRequired(options) {
+    required(options) {
         this.fields[this.currentField].push({
             fn: function(field, object, options) {
                 if (field in object) {
@@ -25,7 +25,7 @@ class Validator {
         return this
     }
 
-    isString(options) {
+    string(options) {
         this.fields[this.currentField].push({
             fn: function(field, object, options) {
                 if (typeof object[field] == 'string') {
@@ -39,7 +39,7 @@ class Validator {
         return this
     }
 
-    isInteger(options) {
+    integer(options) {
         this.fields[this.currentField].push({
             fn: function(field, object, options) {
                 if (object[field] == parseInt(object[field])) {
@@ -53,7 +53,7 @@ class Validator {
         return this
     }
 
-    isIn(options = []) {
+    in(options = []) {
         this.fields[this.currentField].push({
             fn: function(field, object, options) {
                 if (options.includes(object[field])) {
