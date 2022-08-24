@@ -100,6 +100,67 @@ class Validator {
         
         return this
     }
+
+    boolean(options) {
+        const _options = {
+            value: null,
+            ...options
+        }
+
+        this.fields[this.currentField].push({
+            fn: function(field, object, options) {
+                let isTrue = object[field] === true || object[field] === 1
+                let isFalse = object[field] === false || object[field] === 0
+
+                if (_options.value === true && isTrue === false) {
+                    return `The "${field}" field must be "true"`
+                }
+
+                if (_options.value === false && isFalse === false) {
+                    return `The "${field}" field must be "false"`
+                }
+
+                if (_options.value === null && isFalse === false && isTrue === false) {
+                    return `The "${field}" field must be "true" or "false"`
+                }
+
+                return true
+            },
+            options: options
+        })
+        
+        return this
+    }
+
+    array(options) {
+        const _options = {
+            minLength: false,
+            maxLength: false,
+            ...options
+        }
+
+        this.fields[this.currentField].push({
+            fn: function(field, object, options) {
+
+                if (Array.isArray(object[field]) === false) {
+                    return `The "${field}" must be an "array"`
+                }
+
+                if (_options.minLength !== false && object[field].length < _options.minLength) {
+                    return `The "${field}" must have ${_options.minLength} items or more`
+                }
+
+                if (_options.maxLength !== false && object[field].length > _options.maxLength) {
+                    return `The "${field}" must not have more than ${_options.maxLength} items`
+                }
+
+                return true
+            },
+            options: options
+        })
+        
+        return this
+    }
     
     validate(object) {
         let valid = true
