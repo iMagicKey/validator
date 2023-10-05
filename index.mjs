@@ -2,6 +2,11 @@ class Validator {
     constructor() {
         this.fields = {}
         this.currentField = null
+        this.errors = []
+    }
+
+    static init() {
+        return new this()
     }
 
     field(name) {
@@ -11,18 +16,19 @@ class Validator {
         return this
     }
 
-    required(options) {
-        this.fields[this.currentField].push({
-            fn: function(field, object, options) {
-                if (field in object == false) {
-                    return `The "${field}" field is required`
-                }
+    addValidation(field, validationFn, options) {
+        this.fields[this.currentField].push({ field, validationFn, options })
 
-                return true
-            },
-            options: options
+        return this
+    }
+
+    required() {
+        this.addValidation(this.currentField, (field, object) => {
+            if (field in object === false) {
+                return `The "${field}" field is required`
+            }
+            return true
         })
-
         return this
     }
 
@@ -30,12 +36,13 @@ class Validator {
         const _options = {
             minLength: false,
             maxLength: false,
-            ...options
+            ...options,
         }
 
-        this.fields[this.currentField].push({
-            fn: function(field, object, options) {
-                if (typeof object[field] == 'string' == false) {
+        this.addValidation(
+            this.currentField,
+            (field, object) => {
+                if (typeof object[field] !== 'string') {
                     return `The "${field}" must be a "string"`
                 }
 
@@ -48,11 +55,9 @@ class Validator {
                 }
 
                 return true
-                
             },
-            options: options
-        })
-
+            options
+        )
         return this
     }
 
@@ -60,13 +65,14 @@ class Validator {
         const _options = {
             minValue: false,
             maxValue: false,
-            ...options
+            ...options,
         }
 
-        this.fields[this.currentField].push({
-            fn: function(field, object, options) {
-                if (object[field] != parseInt(object[field])) {
-                    return `The "${field}" must be a "integer"`
+        this.addValidation(
+            this.currentField,
+            (field, object) => {
+                if (object[field] !== parseInt(object[field])) {
+                    return `The "${field}" must be an "integer"`
                 }
 
                 if (_options.minValue !== false && object[field] < _options.minValue) {
@@ -76,59 +82,49 @@ class Validator {
                 if (_options.maxValue !== false && object[field] > _options.maxValue) {
                     return `The "${field}" must not be greater than ${_options.maxValue}`
                 }
-                
+
                 return true
-                
             },
-            options: options
-        })
-        
+            options
+        )
         return this
     }
 
     in(options = []) {
-        this.fields[this.currentField].push({
-            fn: function(field, object, options) {
-                if (options.includes(object[field]) == false) {
-                    return `The  "${field}" field does not exist in [${options.map(val => `'${val}'`).join(', ')}]`
-                }
-
-                return true
-            },
-            options: options
+        this.addValidation(this.currentField, (field, object) => {
+            if (!options.includes(object[field])) {
+                return `The "${field}" field does not exist in [${options.map((val) => `'${val}'`).join(', ')}]`
+            }
+            return true
         })
-        
         return this
     }
 
     boolean(options) {
         const _options = {
             value: null,
-            ...options
+            ...options,
         }
 
-        this.fields[this.currentField].push({
-            fn: function(field, object, options) {
-                let isTrue = object[field] === true || object[field] === 1
-                let isFalse = object[field] === false || object[field] === 0
+        this.addValidation(this.currentField, (field, object) => {
+            const fieldValue = object[field]
+            const isTrue = fieldValue === true || fieldValue === 1
+            const isFalse = fieldValue === false || fieldValue === 0
 
-                if (_options.value === true && isTrue === false) {
-                    return `The "${field}" field must be "true"`
-                }
+            if (_options.value === true && isTrue === false) {
+                return `The "${field}" field must be "true"`
+            }
 
-                if (_options.value === false && isFalse === false) {
-                    return `The "${field}" field must be "false"`
-                }
+            if (_options.value === false && isFalse === false) {
+                return `The "${field}" field must be "false"`
+            }
 
-                if (_options.value === null && isFalse === false && isTrue === false) {
-                    return `The "${field}" field must be "true" or "false"`
-                }
+            if (_options.value === null && isFalse === false && isTrue === false) {
+                return `The "${field}" field must be "true" or "false"`
+            }
 
-                return true
-            },
-            options: options
+            return true
         })
-        
         return this
     }
 
@@ -136,12 +132,12 @@ class Validator {
         const _options = {
             minLength: false,
             maxLength: false,
-            ...options
+            ...options,
         }
 
-        this.fields[this.currentField].push({
-            fn: function(field, object, options) {
-
+        this.addValidation(
+            this.currentField,
+            (field, object) => {
                 if (Array.isArray(object[field]) === false) {
                     return `The "${field}" must be an "array"`
                 }
@@ -156,28 +152,26 @@ class Validator {
 
                 return true
             },
-            options: options
-        })
-        
+            options
+        )
         return this
     }
-    
-    validate(object) {
-        let valid = true
-        let errors = []
 
-        for (let field in this.fields) {
-            for (let index in this.fields[field]) {
-                let result = this.fields[field][index].fn(field, object, this.fields[field][index].options)
+    validate(object) {
+        this.errors = []
+
+        for (const field in this.fields) {
+            for (const validation of this.fields[field]) {
+                const result = validation.validationFn(field, object)
                 if (result !== true) {
-                    valid = false
-                    errors.push(result)
+                    this.errors.push(result)
                 }
             }
         }
 
-        return valid || errors
+        return this.errors.length === 0
     }
+
     // isString()
     // isBoolean()
     // isEmail
@@ -186,4 +180,4 @@ class Validator {
     // isJSON
 }
 
-module.exports = Validator
+export default Validator
