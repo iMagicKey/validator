@@ -1,10 +1,10 @@
 export default class ValidatorNumber {
-    constructor({ allowInfinity, allowNaN, allowUnsafe }) {
+    constructor(options) {
         this.rules = []
         this.errors = []
-        this.allowInfinity = allowInfinity ?? true
-        this.allowNaN = allowNaN ?? true
-        this.allowUnsafe = allowUnsafe ?? true
+        this.allowInfinity = options?.allowInfinity ?? true
+        this.allowNaN = options?.allowNaN ?? true
+        this.allowUnsafe = options?.allowUnsafe ?? true
         this.isRequired = false
         this.applyGeneralRules()
     }
