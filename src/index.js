@@ -1,5 +1,6 @@
 import ValidatorObject from './types/Object.js'
 import ValidatorString from './types/String.js'
+import ValidatorNumber from './types/Number.js'
 
 export default class Validator {
     constructor(value, rules) {

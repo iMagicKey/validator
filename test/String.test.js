@@ -74,9 +74,9 @@ describe('ValidatorString', () => {
         expect(validator.errors).to.include('Value fails to match the specified pattern "/^[a-z]+$/".')
     })
 
-    it('should not validate non-string values if not required', () => {
+    it('should not validate non-string values', () => {
         const result = validator.validate(123)
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        expect(result).to.be.false
+        expect(validator.errors).to.include('Value must be type of [object String]. [object Number] given.')
     })
 })

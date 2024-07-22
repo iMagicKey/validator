@@ -60,7 +60,7 @@ export default class ValidatorString {
                 rule(value, this.errors)
             }
         } else {
-            if (this.isRequired) {
+            if ((valueType === '[object Undefined]' && this.isRequired) || valueType !== '[object Undefined]') {
                 this.errors.push(`Value must be type of [object String]. ${valueType} given.`)
             }
         }
