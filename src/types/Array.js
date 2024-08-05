@@ -10,6 +10,17 @@ export default class ValidatorArray {
         return this
     }
 
+    fn(rule) {
+        this.rules.push((value, errors) => {
+            try {
+                rule(value, errors)
+            } catch (error) {
+                errors.push(`Custom validation error: ${error.message}`)
+            }
+        })
+        return this
+    }
+
     unique() {
         this.rules.push((value, errors) => {
             const uniqueValues = new Set(value)

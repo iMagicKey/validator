@@ -10,6 +10,17 @@ export default class ValidatorString {
         return this
     }
 
+    fn(rule) {
+        this.rules.push((value, errors) => {
+            try {
+                rule(value, errors)
+            } catch (error) {
+                errors.push(`Custom validation error: ${error.message}`)
+            }
+        })
+        return this
+    }
+
     length(limit) {
         this.rules.push((value, errors) => {
             if (value.length !== limit) {

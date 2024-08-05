@@ -14,6 +14,17 @@ export default class ValidatorNumber {
         return this
     }
 
+    fn(rule) {
+        this.rules.push((value, errors) => {
+            try {
+                rule(value, errors)
+            } catch (error) {
+                errors.push(`Custom validation error: ${error.message}`)
+            }
+        })
+        return this
+    }
+
     max(limit) {
         this.rules.push((value, errors) => {
             if (value > limit) {

@@ -6,6 +6,7 @@ const object = {
     day: 1,
     month: 10,
     year: 1993,
+    slug: 'slug',
 }
 
 const schema = IMV.object({
@@ -14,6 +15,13 @@ const schema = IMV.object({
     day: IMV.number().required().min(1).max(31),
     month: IMV.number().required().min(1).max(12),
     year: IMV.number().required().min(1900).max(2024),
+    slug: IMV.string()
+        .required()
+        .fn((value, errors) => {
+            if (value !== 'slug') {
+                errors.push('Value not good')
+            }
+        }),
 })
 
 const result = schema.validate(object)

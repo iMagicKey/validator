@@ -7,6 +7,17 @@ export default class ValidatorObject {
         this.fields = fields
     }
 
+    fn(rule) {
+        this.rules.push((value, errors) => {
+            try {
+                rule(value, errors)
+            } catch (error) {
+                errors.push(`Custom validation error: ${error.message}`)
+            }
+        })
+        return this
+    }
+
     length(limit) {
         this.rules.push((value, errors) => {
             const keys = Object.keys(value)
