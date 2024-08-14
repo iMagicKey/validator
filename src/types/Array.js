@@ -15,7 +15,7 @@ export default class ValidatorArray {
             try {
                 rule(value, errors)
             } catch (error) {
-                errors.push(`Custom validation error: ${error.message}`)
+                errors.push({ field: null, code: 'ARRAY_CUSTOM_VALIDATION', message: `Custom validation error: ${error.message}` })
             }
         })
         return this
@@ -25,7 +25,7 @@ export default class ValidatorArray {
         this.rules.push((value, errors) => {
             const uniqueValues = new Set(value)
             if (uniqueValues.size !== value.length) {
-                errors.push('Array elements must be unique.')
+                errors.push({ field: null, code: 'ARRAY_UNIQUE', message: 'Array elements must be unique.' })
             }
         })
         return this
@@ -35,7 +35,10 @@ export default class ValidatorArray {
         this.rules.push((value, errors) => {
             const invalidValues = value.filter((item) => !allowedValues.includes(item))
             if (invalidValues.length > 0) {
-                errors.push(`Array elements must be one of ${JSON.stringify(allowedValues)}. Invalid values: ${JSON.stringify(invalidValues)}.`)
+                errors.push({
+                    code: 'ARRAY_IN',
+                    message: `Array elements must be one of ${JSON.stringify(allowedValues)}. Invalid values: ${JSON.stringify(invalidValues)}.`,
+                })
             }
         })
         return this
@@ -44,7 +47,7 @@ export default class ValidatorArray {
     min(limit) {
         this.rules.push((value, errors) => {
             if (value.length < limit) {
-                errors.push(`Array must have at least ${limit} elements, ${value.length} given.`)
+                errors.push({ field: null, code: 'ARRAY_MIN_LENGTH', message: `Array must have at least ${limit} elements, ${value.length} given.` })
             }
         })
         return this
@@ -53,7 +56,7 @@ export default class ValidatorArray {
     max(limit) {
         this.rules.push((value, errors) => {
             if (value.length > limit) {
-                errors.push(`Array must have at most ${limit} elements, ${value.length} given.`)
+                errors.push({ field: null, code: 'ARRAY_MAX_LENGTH', message: `Array must have at most ${limit} elements, ${value.length} given.` })
             }
         })
         return this
@@ -62,7 +65,7 @@ export default class ValidatorArray {
     length(limit) {
         this.rules.push((value, errors) => {
             if (value.length !== limit) {
-                errors.push(`Array must have exactly ${limit} elements, ${value.length} given.`)
+                errors.push({ field: null, code: 'ARRAY_EXACT_LENGTH', message: `Array must have exactly ${limit} elements, ${value.length} given.` })
             }
         })
         return this
@@ -78,7 +81,7 @@ export default class ValidatorArray {
             }
         } else {
             if ((valueType === '[object Undefined]' && this.isRequired) || valueType !== '[object Undefined]') {
-                this.errors.push(`Value must be type of [object Array]. ${valueType} given.`)
+                this.errors.push({ field: null, code: 'ARRAY_TYPE_ERROR', message: `Value must be type of [object Array]. ${valueType} given.` })
             }
         }
 

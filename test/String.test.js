@@ -1,82 +1,93 @@
 import { expect } from 'chai'
-import ValidatorString from '../src/types/String.js'
+import IMV from '../src/index.js'
 
-describe('ValidatorString', () => {
-    let validator
-
-    beforeEach(() => {
-        validator = new ValidatorString()
-    })
-
+describe('String', () => {
     it('should validate required string correctly', () => {
-        validator.required()
-        const result = validator.validate('test')
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.string().required()
 
-        const resultFail = validator.validate(undefined)
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value must be type of [object String]. [object Undefined] given.')
+        expect(schema.validate('test')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(undefined)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_TYPE_ERROR')).to.be.true
     })
 
     it('should validate string length correctly', () => {
-        validator.length(4)
-        const result = validator.validate('test')
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.string().length(4)
 
-        const resultFail = validator.validate('testing')
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value must have a length of 4 characters, 7 given.')
+        expect(schema.validate('test')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('testing')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_LENGTH')).to.be.true
     })
 
     it('should validate string max length correctly', () => {
-        validator.max(4)
-        const result = validator.validate('test')
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.string().max(4)
 
-        const resultFail = validator.validate('testing')
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value must have at most 4 characters, 7 given.')
+        expect(schema.validate('test')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('testing')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_MAX_LENGTH')).to.be.true
     })
 
     it('should validate string min length correctly', () => {
-        validator.min(4)
-        const result = validator.validate('test')
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.string().min(4)
 
-        const resultFail = validator.validate('tes')
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value must have at least 4 characters, 3 given.')
+        expect(schema.validate('test')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('tes')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_MIN_LENGTH')).to.be.true
     })
 
     it('should validate string pattern correctly', () => {
-        validator.pattern(/^[a-z]+$/)
-        const result = validator.validate('test')
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.string().pattern(/^[a-z]+$/)
 
-        const resultFail = validator.validate('test123')
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value fails to match the specified pattern "/^[a-z]+$/".')
+        expect(schema.validate('test')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('test123')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_PATTERN_MISMATCH')).to.be.true
     })
 
     it('should validate inverted string pattern correctly', () => {
-        validator.pattern(/^[a-z]+$/, { invert: true })
-        const result = validator.validate('test123')
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.string().pattern(/^[a-z]+$/, { invert: true })
 
-        const resultFail = validator.validate('test')
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value fails to match the specified pattern "/^[a-z]+$/".')
+        expect(schema.validate('test123')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('test')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_PATTERN_MISMATCH')).to.be.true
     })
 
     it('should not validate non-string values', () => {
-        const result = validator.validate(123)
-        expect(result).to.be.false
-        expect(validator.errors).to.include('Value must be type of [object String]. [object Number] given.')
+        const schema = IMV.string()
+
+        expect(schema.validate(123)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_TYPE_ERROR')).to.be.true
+    })
+
+    it('should validate string custom validator correctly', () => {
+        const schema = IMV.string().fn((value, errors) => {
+            if (value.startsWith('1')) {
+                errors.push({ field: null, code: 'CUSTOM_ERROR', message: 'Custom message' })
+            }
+        })
+
+        expect(schema.validate('245')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('123')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'CUSTOM_ERROR')).to.be.true
+    })
+
+    it('should validate string custom validator error', () => {
+        const schema = IMV.string().fn(() => {
+            throw Error()
+        })
+        expect(schema.validate('123')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_CUSTOM_VALIDATION')).to.be.true
     })
 })

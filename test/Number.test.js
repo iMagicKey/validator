@@ -1,103 +1,92 @@
 import { expect } from 'chai'
-import ValidatorNumber from '../src/types/Number.js'
+import IMV from '../src/index.js'
 
-describe('ValidatorNumber', () => {
-    let validator
-
-    beforeEach(() => {
-        validator = new ValidatorNumber({})
-    })
-
+describe('Number', () => {
     it('should validate required number correctly', () => {
-        validator.required()
-        const result = validator.validate(123)
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.number().required()
 
-        const resultFail = validator.validate(undefined)
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value must be type of [object Number]. [object Undefined] given.')
+        expect(schema.validate(123)).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(undefined)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_TYPE_ERROR')).to.be.true
     })
 
     it('should validate number max limit correctly', () => {
-        validator.max(100)
-        const result = validator.validate(50)
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.number().max(100)
 
-        const resultFail = validator.validate(150)
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Number must be at most 100.')
+        expect(schema.validate(50)).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(150)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_MAX')).to.be.true
     })
 
     it('should validate number min limit correctly', () => {
-        validator.min(10)
-        const result = validator.validate(20)
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.number().min(10)
 
-        const resultFail = validator.validate(5)
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Number must be at least 10.')
+        expect(schema.validate(20)).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(5)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_MIN')).to.be.true
     })
 
     it('should validate safe integer when allowUnsafe is false', () => {
-        validator = new ValidatorNumber({ allowUnsafe: false })
-        const result = validator.validate(9007199254740991)
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.number({ allowUnsafe: false })
 
-        const resultFail = validator.validate(9007199254740992)
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value must be a safe integer.')
+        expect(schema.validate(9007199254740991)).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(9007199254740992)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_UNSAFE')).to.be.true
     })
 
     it('should validate NaN when allowNaN is false', () => {
-        validator = new ValidatorNumber({ allowNaN: false })
-        const resultFail = validator.validate(NaN)
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('NaN is not allowed.')
+        const schema = IMV.number({ allowNaN: false })
+
+        expect(schema.validate(NaN)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_NAN_NOT_ALLOWED')).to.be.true
     })
 
     it('should allow NaN when allowNaN is true', () => {
-        validator = new ValidatorNumber({ allowNaN: true })
-        const result = validator.validate(NaN)
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.number({ allowNaN: true })
+
+        expect(schema.validate(NaN)).to.be.true
+        expect(schema.errors).to.be.empty
     })
 
     it('should validate Infinity when allowInfinity is false', () => {
-        validator = new ValidatorNumber({ allowInfinity: false })
-        const resultFail = validator.validate(Infinity)
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Infinity and -Infinity are not allowed.')
+        const schema = IMV.number({ allowInfinity: false })
 
-        const resultFailNeg = validator.validate(-Infinity)
-        expect(resultFailNeg).to.be.false
-        expect(validator.errors).to.include('Infinity and -Infinity are not allowed.')
+        expect(schema.validate(Infinity)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_INFINITY_NOT_ALLOWED')).to.be.true
+
+        expect(schema.validate(-Infinity)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_INFINITY_NOT_ALLOWED')).to.be.true
     })
 
     it('should allow Infinity when allowInfinity is true', () => {
-        validator = new ValidatorNumber({ allowInfinity: true })
-        const result = validator.validate(Infinity)
-        expect(result).to.be.true
-        expect(validator.errors).to.be.empty
+        const schema = IMV.number({ allowInfinity: true })
 
-        const resultNeg = validator.validate(-Infinity)
-        expect(resultNeg).to.be.true
-        expect(validator.errors).to.be.empty
+        expect(schema.validate(Infinity)).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(-Infinity)).to.be.true
+        expect(schema.errors).to.be.empty
     })
 
     it('should handle non-number values when required', () => {
-        const resultFail = validator.validate('123')
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.include('Value must be type of [object Number]. [object String] given.')
+        const schema = IMV.number().required()
+
+        expect(schema.validate('123')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_TYPE_ERROR')).to.be.true
     })
 
     it('should handle optional numbers correctly', () => {
-        const validatorNumber = new ValidatorNumber({})
-        const result = validatorNumber.validate(undefined)
-        expect(result).to.be.true
-        expect(validatorNumber.errors).to.be.empty
+        const schema = IMV.number()
+
+        expect(schema.validate(undefined)).to.be.true
+        expect(schema.errors).to.be.empty
     })
 })

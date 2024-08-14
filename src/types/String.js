@@ -15,7 +15,7 @@ export default class ValidatorString {
             try {
                 rule(value, errors)
             } catch (error) {
-                errors.push(`Custom validation error: ${error.message}`)
+                errors.push({ field: null, code: 'STRING_CUSTOM_VALIDATION', message: `Custom validation error: ${error.message}` })
             }
         })
         return this
@@ -24,7 +24,7 @@ export default class ValidatorString {
     length(limit) {
         this.rules.push((value, errors) => {
             if (value.length !== limit) {
-                errors.push(`Value must have a length of ${limit} characters, ${value.length} given.`)
+                errors.push({ field: null, code: 'STRING_LENGTH', message: `Value must have a length of ${limit} characters, ${value.length} given.` })
             }
         })
         return this
@@ -33,7 +33,7 @@ export default class ValidatorString {
     max(limit) {
         this.rules.push((value, errors) => {
             if (value.length > limit) {
-                errors.push(`Value must have at most ${limit} characters, ${value.length} given.`)
+                errors.push({ field: null, code: 'STRING_MAX_LENGTH', message: `Value must have at most ${limit} characters, ${value.length} given.` })
             }
         })
         return this
@@ -42,7 +42,7 @@ export default class ValidatorString {
     min(limit) {
         this.rules.push((value, errors) => {
             if (value.length < limit) {
-                errors.push(`Value must have at least ${limit} characters, ${value.length} given.`)
+                errors.push({ field: null, code: 'STRING_MIN_LENGTH', message: `Value must have at least ${limit} characters, ${value.length} given.` })
             }
         })
         return this
@@ -55,7 +55,7 @@ export default class ValidatorString {
 
             const isMatching = patternRegex.test(value)
             if ((invert && isMatching) || (!invert && !isMatching)) {
-                errors.push(`Value fails to match the specified pattern "${patternRegex}".`)
+                errors.push({ field: null, code: 'STRING_PATTERN_MISMATCH', message: `Value fails to match the specified pattern "${patternRegex}".` })
             }
         })
         return this
@@ -72,7 +72,7 @@ export default class ValidatorString {
             }
         } else {
             if ((valueType === '[object Undefined]' && this.isRequired) || valueType !== '[object Undefined]') {
-                this.errors.push(`Value must be type of [object String]. ${valueType} given.`)
+                this.errors.push({ field: null, code: 'STRING_TYPE_ERROR', message: `Value must be type of [object String]. ${valueType} given.` })
             }
         }
 

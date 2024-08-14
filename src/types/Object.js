@@ -1,10 +1,14 @@
 export default class ValidatorObject {
     constructor(fields = {}) {
         this.rules = []
-        this.errors = {
-            _self: [],
-        }
+        this.errors = []
+        this.isRequired = false
         this.fields = fields
+    }
+
+    required() {
+        this.isRequired = true
+        return this
     }
 
     fn(rule) {
@@ -12,7 +16,7 @@ export default class ValidatorObject {
             try {
                 rule(value, errors)
             } catch (error) {
-                errors.push(`Custom validation error: ${error.message}`)
+                errors.push({ field: null, code: 'OBJECT_CUSTOM_VALIDATION', message: `Custom validation error: ${error.message}` })
             }
         })
         return this
@@ -22,7 +26,7 @@ export default class ValidatorObject {
         this.rules.push((value, errors) => {
             const keys = Object.keys(value)
             if (keys.length !== limit) {
-                errors.push(`Object must have exactly ${limit} keys, ${keys.length} given.`)
+                errors.push({ field: null, code: 'OBJECT_KEYS_LENGTH', message: `Object must have exactly ${limit} keys, ${keys.length} given.` })
             }
         })
         return this
@@ -31,8 +35,8 @@ export default class ValidatorObject {
     max(limit) {
         this.rules.push((value, errors) => {
             const keys = Object.keys(value)
-            if (Object.keys(value).length > limit) {
-                errors.push(`Object must have at most ${limit} keys, ${keys.length} given.`)
+            if (keys.length > limit) {
+                errors.push({ field: null, code: 'OBJECT_KEYS_MAX', message: `Object must have at most ${limit} keys, ${keys.length} given.` })
             }
         })
         return this
@@ -42,23 +46,21 @@ export default class ValidatorObject {
         this.rules.push((value, errors) => {
             const keys = Object.keys(value)
             if (keys.length < limit) {
-                errors.push(`Object must have at least ${limit} keys, ${keys.length} given.`)
+                errors.push({ field: null, code: 'OBJECT_KEYS_MIN', message: `Object must have at least ${limit} keys, ${keys.length} given.` })
             }
         })
         return this
     }
 
     validate(value) {
-        this.errors = {
-            _self: [],
-        }
+        this.errors = []
 
         const valueType = Object.prototype.toString.call(value)
         if (valueType !== '[object Object]') {
-            this.errors._self.push(`Value must be type of [object Object]. ${valueType} given.`)
+            this.errors.push({ field: null, code: 'OBJECT_TYPE_ERROR', message: `Value must be type of [object Object]. ${valueType} given.` })
         } else {
             for (const rule of this.rules) {
-                rule(value, this.errors._self)
+                rule(value, this.errors)
             }
 
             for (const field in this.fields) {
@@ -66,11 +68,14 @@ export default class ValidatorObject {
                 const fieldValidateResult = fieldValidator.validate(value[field])
 
                 if (!fieldValidateResult) {
-                    this.errors[field] = fieldValidator.errors
+                    this.errors = fieldValidator.errors.map((val) => {
+                        val.field = field
+                        return val
+                    })
                 }
             }
         }
 
-        return this.errors._self.length === 0 && Object.keys(this.errors).length === 1
+        return this.errors.length === 0
     }
 }

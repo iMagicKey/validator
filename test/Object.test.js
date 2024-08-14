@@ -1,67 +1,78 @@
 import { expect } from 'chai'
-import ValidatorObject from '../src/types/Object.js'
+import IMV from '../src/index.js'
 
 describe('ValidatorObject', () => {
-    let validator
-
-    beforeEach(() => {
-        validator = new ValidatorObject()
-    })
-
     it('should validate object length correctly', () => {
-        validator.length(3)
-        const result = validator.validate({ a: 1, b: 2, c: 3 })
-        expect(result).to.be.true
-        expect(validator.errors._self).to.be.empty
+        const schema = IMV.object().length(3)
 
-        const resultFail = validator.validate({ a: 1, b: 2 })
-        expect(resultFail).to.be.false
-        expect(validator.errors._self).to.include('Object must have exactly 3 keys, 2 given.')
+        expect(schema.validate({ a: 1, b: 2, c: 3 })).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate({ a: 1, b: 2 })).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_KEYS_LENGTH')).to.be.true
     })
 
     it('should validate object max keys correctly', () => {
-        validator.max(2)
-        const result = validator.validate({ a: 1, b: 2 })
-        expect(result).to.be.true
-        expect(validator.errors._self).to.be.empty
+        const schema = IMV.object().max(2)
 
-        const resultFail = validator.validate({ a: 1, b: 2, c: 3 })
-        expect(resultFail).to.be.false
-        expect(validator.errors._self).to.include('Object must have at most 2 keys, 3 given.')
+        expect(schema.validate({ a: 1, b: 2 })).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate({ a: 1, b: 2, c: 3 })).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_KEYS_MAX')).to.be.true
     })
 
     it('should validate object min keys correctly', () => {
-        validator.min(2)
-        const result = validator.validate({ a: 1, b: 2 })
-        expect(result).to.be.true
-        expect(validator.errors._self).to.be.empty
+        const schema = IMV.object().min(2)
 
-        const resultFail = validator.validate({ a: 1 })
-        expect(resultFail).to.be.false
-        expect(validator.errors._self).to.include('Object must have at least 2 keys, 1 given.')
+        expect(schema.validate({ a: 1, b: 2 })).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate({ a: 1 })).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_KEYS_MIN')).to.be.true
     })
 
     it('should validate nested fields correctly', () => {
-        const nestedValidator = new ValidatorObject().length(2)
-        validator = new ValidatorObject({ nested: nestedValidator })
+        const schema = IMV.object({
+            nested: IMV.object().length(2),
+        })
 
-        const result = validator.validate({ nested: { a: 1, b: 2 } })
-        expect(result).to.be.true
-        expect(validator.errors._self).to.be.empty
+        expect(schema.validate({ nested: { a: 1, b: 2 } })).to.be.true
+        expect(schema.errors).to.be.empty
 
-        const resultFail = validator.validate({ nested: { a: 1 } })
-        expect(resultFail).to.be.false
-        expect(validator.errors).to.have.property('nested')
-        expect(validator.errors.nested._self).to.include('Object must have exactly 2 keys, 1 given.')
+        expect(schema.validate({ nested: { a: 1 } })).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_KEYS_LENGTH' && error.field === 'nested')).to.be.true
     })
 
     it('should validate non-object values correctly', () => {
-        const result = validator.validate('string')
-        expect(result).to.be.false
-        expect(validator.errors._self).to.include('Value must be type of [object Object]. [object String] given.')
+        const schema = IMV.object().required()
 
-        const resultNull = validator.validate(null)
-        expect(resultNull).to.be.false
-        expect(validator.errors._self).to.include('Value must be type of [object Object]. [object Null] given.')
+        expect(schema.validate('string')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_TYPE_ERROR')).to.be.true
+
+        expect(schema.validate(null)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_TYPE_ERROR')).to.be.true
+    })
+
+    it('should validate object custom validator correctly', () => {
+        const schema = IMV.object().fn((value, errors) => {
+            if (Object.keys(value).includes('c')) {
+                errors.push({ field: null, code: 'CUSTOM_ERROR', message: 'Custom message' })
+            }
+        })
+
+        expect(schema.validate({ a: 1, b: 2 })).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate({ a: 1, b: 2, c: 3 })).to.be.false
+        expect(schema.errors.some((error) => error.code === 'CUSTOM_ERROR')).to.be.true
+    })
+
+    it('should validate object custom validator error', () => {
+        const schema = IMV.object().fn(() => {
+            throw Error()
+        })
+        expect(schema.validate({ a: 1, b: 2, c: 3 })).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_CUSTOM_VALIDATION')).to.be.true
     })
 })

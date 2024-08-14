@@ -14,15 +14,15 @@ export default class Validator {
         return new ValidatorObject(fields)
     }
 
-    static string() {
-        return new ValidatorString()
+    static string(options) {
+        return new ValidatorString(options)
     }
 
-    static number() {
-        return new ValidatorNumber()
+    static number(options) {
+        return new ValidatorNumber(options)
     }
 
-    static array() {
-        return new ValidatorArray()
+    static array(options) {
+        return new ValidatorArray(options)
     }
 }

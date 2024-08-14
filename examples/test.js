@@ -24,6 +24,4 @@ const schema = IMV.object({
         }),
 })
 
-const result = schema.validate(object)
-
-console.log(result, schema.errors)
+console.log(schema.validate(object), schema.errors)
