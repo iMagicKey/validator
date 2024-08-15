@@ -56,9 +56,8 @@ export default class ValidatorObject {
         this.errors = []
 
         const valueType = Object.prototype.toString.call(value)
-        if (valueType !== '[object Object]') {
-            this.errors.push({ field: null, code: 'OBJECT_TYPE_ERROR', message: `Value must be type of [object Object]. ${valueType} given.` })
-        } else {
+
+        if (valueType === '[object Object]') {
             for (const rule of this.rules) {
                 rule(value, this.errors)
             }
@@ -73,6 +72,10 @@ export default class ValidatorObject {
                         return val
                     })
                 }
+            }
+        } else {
+            if ((valueType === '[object Undefined]' && this.isRequired) || valueType !== '[object Undefined]') {
+                this.errors.push({ field: null, code: 'OBJECT_TYPE_ERROR', message: `Value must be type of [object Object]. ${valueType} given.` })
             }
         }
 

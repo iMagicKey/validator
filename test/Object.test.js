@@ -75,4 +75,24 @@ describe('ValidatorObject', () => {
         expect(schema.validate({ a: 1, b: 2, c: 3 })).to.be.false
         expect(schema.errors.some((error) => error.code === 'OBJECT_CUSTOM_VALIDATION')).to.be.true
     })
+
+    it('should validate required object', () => {
+        const schema = IMV.object().required()
+
+        expect(schema.validate({})).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(undefined)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_TYPE_ERROR')).to.be.true
+    })
+
+    it('should validate not required object', () => {
+        const schema = IMV.object()
+
+        expect(schema.validate({})).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(undefined)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
 })
