@@ -67,10 +67,12 @@ export default class ValidatorObject {
                 const fieldValidateResult = fieldValidator.validate(value[field])
 
                 if (!fieldValidateResult) {
-                    this.errors = fieldValidator.errors.map((val) => {
-                        val.field = field
-                        return val
-                    })
+                    this.errors = this.errors.concat(
+                        fieldValidator.errors.map((val) => {
+                            val.field = val.field ? [field, val.field].join('.') : field
+                            return val
+                        })
+                    )
                 }
             }
         } else {

@@ -7,6 +7,8 @@ const object = {
     month: 10,
     year: 1993,
     slug: 'slug',
+    date: {
+    }
 }
 
 const schema = IMV.object({
@@ -22,6 +24,10 @@ const schema = IMV.object({
                 errors.push('Value not good')
             }
         }),
+    date: IMV.object({
+        day: IMV.number().required().min(1).max(31),
+        month: IMV.number().required().min(1).max(12),
+    }).required()
 })
 
 console.log(schema.validate(object), schema.errors)
