@@ -2,6 +2,7 @@ import ValidatorObject from './types/Object.js'
 import ValidatorString from './types/String.js'
 import ValidatorNumber from './types/Number.js'
 import ValidatorArray from './types/Array.js'
+import ValidatorBoolean from './types/Boolean.js'
 
 export default class Validator {
     constructor(value, rules) {
@@ -24,5 +25,8 @@ export default class Validator {
 
     static array(options) {
         return new ValidatorArray(options)
+    }
+    static boolean(options) {
+        return new ValidatorBoolean(options)
     }
 }
