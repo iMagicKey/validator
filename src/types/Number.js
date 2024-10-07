@@ -28,7 +28,7 @@ export default class ValidatorNumber {
     max(limit) {
         this.rules.push((value, errors) => {
             if (value > limit) {
-                errors.push({ field: null, code: 'NUMBER_MAX', message: `Number must be at most ${limit}.` })
+                errors.push({ field: null, code: 'NUMBER_MAX', message: `Value must be at most ${limit}.` })
             }
         })
 
@@ -38,10 +38,22 @@ export default class ValidatorNumber {
     min(limit) {
         this.rules.push((value, errors) => {
             if (value < limit) {
-                errors.push({ field: null, code: 'NUMBER_MIN', message: `Number must be at least ${limit}.` })
+                errors.push({ field: null, code: 'NUMBER_MIN', message: `Value must be at least ${limit}.` })
             }
         })
 
+        return this
+    }
+
+    in(allowedValues) {
+        this.rules.push((value, errors) => {
+            if (!allowedValues.includes(value)) {
+                errors.push({
+                    code: 'NUMBER_IN',
+                    message: `Number must be one of ${JSON.stringify(allowedValues)}. Invalid values: ${JSON.stringify(value)}.`,
+                })
+            }
+        })
         return this
     }
 

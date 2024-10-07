@@ -89,4 +89,13 @@ describe('Number', () => {
         expect(schema.validate(undefined)).to.be.true
         expect(schema.errors).to.be.empty
     })
+
+    it('should validate in value', () => {
+        const schema = IMV.number().in([1, 2])
+
+        expect(schema.validate(1)).to.be.true
+
+        expect(schema.validate(3)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'NUMBER_IN')).to.be.true
+    })
 })

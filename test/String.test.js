@@ -69,6 +69,15 @@ describe('String', () => {
         expect(schema.errors.some((error) => error.code === 'STRING_TYPE_ERROR')).to.be.true
     })
 
+    it('should validate in value', () => {
+        const schema = IMV.string().in(['one', 'two'])
+
+        expect(schema.validate('one')).to.be.true
+
+        expect(schema.validate('three')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_IN')).to.be.true
+    })
+
     it('should validate string custom validator correctly', () => {
         const schema = IMV.string().fn((value, errors) => {
             if (value.startsWith('1')) {
