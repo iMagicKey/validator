@@ -12,6 +12,19 @@ describe('ValidatorObject', () => {
         expect(schema.errors.some((error) => error.code === 'OBJECT_KEYS_LENGTH')).to.be.true
     })
 
+    it('should validate object strict mode correctly', () => {
+        const schema = IMV.object({
+            name: IMV.string().required(),
+            age: IMV.number(),
+        }).strict()
+
+        expect(schema.validate({ name: 'John', age: 30 })).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate({ name: 'John', age: 30, extra: true })).to.be.false
+        expect(schema.errors.some((error) => error.code === 'OBJECT_EXTRA_KEYS')).to.be.true
+    })
+
     it('should validate object max keys correctly', () => {
         const schema = IMV.object().max(2)
 

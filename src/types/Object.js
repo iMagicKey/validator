@@ -4,10 +4,16 @@ export default class ValidatorObject {
         this.errors = []
         this.isRequired = false
         this.fields = fields
+        this.strictMode = false
     }
 
     required() {
         this.isRequired = true
+        return this
+    }
+
+    strict() {
+        this.strictMode = true
         return this
     }
 
@@ -60,6 +66,17 @@ export default class ValidatorObject {
         if (valueType === '[object Object]') {
             for (const rule of this.rules) {
                 rule(value, this.errors)
+            }
+
+            if (this.strictMode) {
+                const extraKeys = Object.keys(value).filter((key) => !(key in this.fields))
+                if (extraKeys.length > 0) {
+                    this.errors.push({
+                        field: null,
+                        code: 'OBJECT_EXTRA_KEYS',
+                        message: `Object contains unexpected keys: ${extraKeys.join(', ')}.`,
+                    })
+                }
             }
 
             for (const field in this.fields) {
