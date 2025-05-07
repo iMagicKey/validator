@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import IMV from '../src/index.js'
 
-describe('ValidatorObject', () => {
+describe('Object', () => {
     it('should validate object length correctly', () => {
         const schema = IMV.object().length(3)
 
