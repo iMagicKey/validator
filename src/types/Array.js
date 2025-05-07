@@ -1,8 +1,9 @@
 export default class ValidatorArray {
-    constructor() {
+    constructor(itemValidator = null) {
         this.rules = []
         this.errors = []
         this.isRequired = false
+        this.itemValidator = itemValidator
     }
 
     required() {
@@ -78,6 +79,21 @@ export default class ValidatorArray {
         if (valueType === '[object Array]') {
             for (const rule of this.rules) {
                 rule(value, this.errors)
+            }
+
+            if (this.itemValidator) {
+                value.forEach((item, index) => {
+                    const isValid = this.itemValidator.validate(item)
+                    if (!isValid && Array.isArray(this.itemValidator.errors)) {
+                        for (const err of this.itemValidator.errors) {
+                            this.errors.push({
+                                field: `[${index}]${err.field ? `.${err.field}` : ''}`,
+                                code: err.code,
+                                message: err.message,
+                            })
+                        }
+                    }
+                })
             }
         } else {
             if ((valueType === '[object Undefined]' && this.isRequired) || valueType !== '[object Undefined]') {
