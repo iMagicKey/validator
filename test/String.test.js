@@ -99,4 +99,45 @@ describe('String', () => {
         expect(schema.validate('123')).to.be.false
         expect(schema.errors.some((error) => error.code === 'STRING_CUSTOM_VALIDATION')).to.be.true
     })
+
+    it('should validate IPv4 correctly', () => {
+        const schema = IMV.string().ip({ v4: true, v6: false })
+
+        expect(schema.validate('192.168.1.1')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('255.255.255.255')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('::1')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_IP_FORMAT')).to.be.true
+
+        expect(schema.validate('invalid-ip')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_IP_FORMAT')).to.be.true
+    })
+
+    it('should validate IPv6 correctly', () => {
+        const schema = IMV.string().ip({ v4: false, v6: true })
+        expect(schema.validate('2001:0db8:85a3:0000:0000:8a2e:0370:7334')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('192.168.1.1')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_IP_FORMAT')).to.be.true
+
+        expect(schema.validate('invalid-ip')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_IP_FORMAT')).to.be.true
+    })
+
+    it('should validate IPv4 or IPv6 correctly', () => {
+        const schema = IMV.string().ip({ v4: true, v6: true })
+
+        expect(schema.validate('192.168.1.1')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('2001:0db8:85a3:0000:0000:8a2e:0370:7334')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('invalid-ip')).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_IP_FORMAT')).to.be.true
+    })
 })

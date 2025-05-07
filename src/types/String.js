@@ -89,6 +89,28 @@ export default class ValidatorString {
         return this
     }
 
+    ip({ v4 = true, v6 = true } = {}) {
+        this.rules.push((value, errors) => {
+            const ipv4Regex =
+                /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+            const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4})$/
+
+            const isIPv4 = ipv4Regex.test(value)
+            const isIPv6 = ipv6Regex.test(value)
+
+            const valid = (v4 && isIPv4) || (v6 && isIPv6)
+
+            if (!valid) {
+                errors.push({
+                    field: null,
+                    code: 'STRING_IP_FORMAT',
+                    message: `Value is not a valid IP${v4 && !v6 ? 'v4' : v6 && !v4 ? 'v6' : ''} address.`,
+                })
+            }
+        })
+        return this
+    }
+
     validate(value) {
         this.errors = []
 
