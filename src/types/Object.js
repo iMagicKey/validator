@@ -5,10 +5,16 @@ export default class ValidatorObject {
         this.isRequired = false
         this.fields = fields
         this.strictMode = false
+        this.isNullable = false
     }
 
     required() {
         this.isRequired = true
+        return this
+    }
+
+    nullable() {
+        this.isNullable = true
         return this
     }
 
@@ -62,6 +68,10 @@ export default class ValidatorObject {
         this.errors = []
 
         const valueType = Object.prototype.toString.call(value)
+
+        if (valueType === '[object Null]' && this.isNullable) {
+            return true
+        }
 
         if (valueType === '[object Object]') {
             for (const rule of this.rules) {

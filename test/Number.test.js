@@ -98,4 +98,16 @@ describe('Number', () => {
         expect(schema.validate(3)).to.be.false
         expect(schema.errors.some((error) => error.code === 'NUMBER_IN')).to.be.true
     })
+
+    it('should accept null if nullable is allowed', () => {
+        const schema = IMV.number().nullable()
+        expect(schema.validate(null)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
+
+    it('should reject null if nullable is not allowed', () => {
+        const schema = IMV.number()
+        expect(schema.validate(null)).to.be.false
+        expect(schema.errors.some((e) => e.code === 'NUMBER_TYPE_ERROR')).to.be.true
+    })
 })

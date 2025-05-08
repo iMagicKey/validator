@@ -6,11 +6,17 @@ export default class ValidatorNumber {
         this.allowNaN = options?.allowNaN ?? true
         this.allowUnsafe = options?.allowUnsafe ?? true
         this.isRequired = false
+        this.isNullable = false
         this.applyGeneralRules()
     }
 
     required() {
         this.isRequired = true
+        return this
+    }
+
+    nullable() {
+        this.isNullable = true
         return this
     }
 
@@ -80,6 +86,10 @@ export default class ValidatorNumber {
     validate(value) {
         this.errors = []
         const valueType = Object.prototype.toString.call(value)
+
+        if (valueType === '[object Null]' && this.isNullable) {
+            return true
+        }
 
         if (valueType === '[object Number]') {
             for (const rule of this.rules) {

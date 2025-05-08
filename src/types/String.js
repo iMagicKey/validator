@@ -3,10 +3,16 @@ export default class ValidatorString {
         this.rules = []
         this.errors = []
         this.isRequired = false
+        this.isNullable = false
     }
 
     required() {
         this.isRequired = true
+        return this
+    }
+
+    nullable() {
+        this.isNullable = true
         return this
     }
 
@@ -115,6 +121,10 @@ export default class ValidatorString {
         this.errors = []
 
         const valueType = Object.prototype.toString.call(value)
+
+        if (valueType === '[object Null]' && this.isNullable) {
+            return true
+        }
 
         if (valueType === '[object String]') {
             for (const rule of this.rules) {

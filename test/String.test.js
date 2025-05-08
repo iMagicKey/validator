@@ -140,4 +140,16 @@ describe('String', () => {
         expect(schema.validate('invalid-ip')).to.be.false
         expect(schema.errors.some((error) => error.code === 'STRING_IP_FORMAT')).to.be.true
     })
+
+    it('should accept null if nullable is allowed', () => {
+        const schema = IMV.string().nullable()
+        expect(schema.validate(null)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
+
+    it('should reject null if nullable is not allowed', () => {
+        const schema = IMV.string()
+        expect(schema.validate(null)).to.be.false
+        expect(schema.errors.some((e) => e.code === 'STRING_TYPE_ERROR')).to.be.true
+    })
 })

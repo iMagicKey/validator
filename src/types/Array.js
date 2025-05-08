@@ -4,10 +4,16 @@ export default class ValidatorArray {
         this.errors = []
         this.isRequired = false
         this.itemValidator = itemValidator
+        this.isNullable = false
     }
 
     required() {
         this.isRequired = true
+        return this
+    }
+
+    nullable() {
+        this.isNullable = true
         return this
     }
 
@@ -75,6 +81,10 @@ export default class ValidatorArray {
     validate(value) {
         this.errors = []
         const valueType = Object.prototype.toString.call(value)
+
+        if (valueType === '[object Null]' && this.isNullable) {
+            return true
+        }
 
         if (valueType === '[object Array]') {
             for (const rule of this.rules) {

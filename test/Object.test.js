@@ -108,4 +108,16 @@ describe('Object', () => {
         expect(schema.validate(undefined)).to.be.true
         expect(schema.errors).to.be.empty
     })
+
+    it('should accept null if nullable is allowed', () => {
+        const schema = IMV.object().nullable()
+        expect(schema.validate(null)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
+
+    it('should reject null if nullable is not allowed', () => {
+        const schema = IMV.object()
+        expect(schema.validate(null)).to.be.false
+        expect(schema.errors.some((e) => e.code === 'OBJECT_TYPE_ERROR')).to.be.true
+    })
 })
