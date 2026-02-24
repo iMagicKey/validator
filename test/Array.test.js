@@ -41,6 +41,13 @@ describe('Array', () => {
         expect(schema.errors.some((error) => error.code === 'ARRAY_MIN_LENGTH')).to.be.true
     })
 
+    it('should skip array rules for null when nullable is allowed', () => {
+        const schema = IMV.array().nullable().min(1)
+
+        expect(schema.validate(null)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
+
     it('should validate maximum array length correctly', () => {
         const schema = IMV.array().max(2)
 

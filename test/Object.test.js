@@ -45,6 +45,13 @@ describe('Object', () => {
         expect(schema.errors.some((error) => error.code === 'OBJECT_KEYS_MIN')).to.be.true
     })
 
+    it('should skip object rules for null when nullable is allowed', () => {
+        const schema = IMV.object().nullable().min(1)
+
+        expect(schema.validate(null)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
+
     it('should validate nested fields correctly', () => {
         const schema = IMV.object({
             nested: IMV.object().length(2),

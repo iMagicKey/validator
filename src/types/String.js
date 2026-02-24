@@ -80,6 +80,10 @@ export default class ValidatorString {
 
     pattern(pattern, options) {
         this.rules.push((value, errors) => {
+            if ((value === null && this.isNullable) || value === undefined) {
+                return
+            }
+
             const { invert } = options || {}
             const patternRegex = pattern instanceof RegExp ? pattern : new RegExp(pattern)
 

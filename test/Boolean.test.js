@@ -32,6 +32,32 @@ describe('Boolean', () => {
         expect(schema.errors.some((error) => error.code === 'BOOLEAN_NOT_FALSE')).to.be.true
     })
 
+    it('should validate non-strict isTrue without runtime errors', () => {
+        const schema = IMV.boolean({ strict: false }).isTrue()
+
+        expect(schema.validate(1)).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('true')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(0)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'BOOLEAN_NOT_TRUE')).to.be.true
+    })
+
+    it('should validate non-strict isFalse without runtime errors', () => {
+        const schema = IMV.boolean({ strict: false }).isFalse()
+
+        expect(schema.validate(0)).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate('false')).to.be.true
+        expect(schema.errors).to.be.empty
+
+        expect(schema.validate(1)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'BOOLEAN_NOT_FALSE')).to.be.true
+    })
+
     it('should handle non-boolean values when required', () => {
         const schema = IMV.boolean().required()
 

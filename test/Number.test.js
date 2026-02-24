@@ -32,6 +32,13 @@ describe('Number', () => {
         expect(schema.errors.some((error) => error.code === 'NUMBER_MIN')).to.be.true
     })
 
+    it('should skip number rules for null when nullable is allowed', () => {
+        const schema = IMV.number().nullable().min(10)
+
+        expect(schema.validate(null)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
+
     it('should validate safe integer when allowUnsafe is false', () => {
         const schema = IMV.number({ allowUnsafe: false })
 

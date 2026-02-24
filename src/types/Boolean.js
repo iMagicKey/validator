@@ -11,9 +11,47 @@ export default class ValidatorBoolean {
         return this
     }
 
+    resolveBoolean(value) {
+        const valueType = Object.prototype.toString.call(value)
+
+        if (valueType === '[object Boolean]') {
+            return value
+        }
+
+        if (this.isStrict) {
+            return null
+        }
+
+        if (valueType === '[object Number]') {
+            if (value === 1) {
+                return true
+            }
+
+            if (value === 0) {
+                return false
+            }
+
+            return null
+        }
+
+        if (valueType === '[object String]') {
+            const lowerValue = value.toLowerCase()
+
+            if (lowerValue === 'true') {
+                return true
+            }
+
+            if (lowerValue === 'false') {
+                return false
+            }
+        }
+
+        return null
+    }
+
     isTrue() {
         this.rules.push((value, errors) => {
-            const isTrueValue = this.isStrict ? value === true : value === true || value === 1 || value === '1' || value.toLowerCase() === 'true'
+            const isTrueValue = this.resolveBoolean(value) === true
 
             if (!isTrueValue) {
                 errors.push({ field: null, code: 'BOOLEAN_NOT_TRUE', message: 'Value must be true.' })
@@ -24,7 +62,7 @@ export default class ValidatorBoolean {
 
     isFalse() {
         this.rules.push((value, errors) => {
-            const isFalseValue = this.isStrict ? value === false : value === false || value === 0 || value === '0' || value.toLowerCase() === 'false'
+            const isFalseValue = this.resolveBoolean(value) === false
 
             if (!isFalseValue) {
                 errors.push({ field: null, code: 'BOOLEAN_NOT_FALSE', message: 'Value must be false.' })
@@ -47,21 +85,7 @@ export default class ValidatorBoolean {
     validate(value) {
         this.errors = []
         const valueType = Object.prototype.toString.call(value)
-
-        let isValid = false
-
-        if (this.isStrict) {
-            isValid = valueType === '[object Boolean]'
-        } else {
-            if (valueType === '[object Boolean]') {
-                isValid = true
-            } else if (valueType === '[object Number]') {
-                isValid = value === 0 || value === 1
-            } else if (valueType === '[object String]') {
-                const lowerValue = value.toLowerCase()
-                isValid = lowerValue === 'true' || lowerValue === 'false'
-            }
-        }
+        const isValid = this.resolveBoolean(value) !== null
 
         if (isValid) {
             for (const rule of this.rules) {

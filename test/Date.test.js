@@ -69,6 +69,13 @@ describe('Date', () => {
         expect(schema.errors.some((e) => e.code === 'DATE_MIN')).to.be.true
     })
 
+    it('should skip date rules for null when nullable is allowed', () => {
+        const schema = IMV.date().nullable().min(new Date('2024-01-01'))
+
+        expect(schema.validate(null)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
+
     it('should validate .max() constraint', () => {
         const schema = IMV.date().max(new Date('2025-12-31'))
         expect(schema.validate(new Date('2025-01-01'))).to.be.true

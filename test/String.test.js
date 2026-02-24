@@ -62,6 +62,20 @@ describe('String', () => {
         expect(schema.errors.some((error) => error.code === 'STRING_PATTERN_MISMATCH')).to.be.true
     })
 
+    it('should skip pattern validation for null when nullable is allowed', () => {
+        const schema = IMV.string().nullable().pattern(/^[a-z]+$/)
+
+        expect(schema.validate(null)).to.be.true
+        expect(schema.errors).to.be.empty
+    })
+
+    it('should reject null with pattern when nullable is not allowed', () => {
+        const schema = IMV.string().pattern(/^[a-z]+$/)
+
+        expect(schema.validate(null)).to.be.false
+        expect(schema.errors.some((error) => error.code === 'STRING_TYPE_ERROR')).to.be.true
+    })
+
     it('should not validate non-string values', () => {
         const schema = IMV.string()
 
