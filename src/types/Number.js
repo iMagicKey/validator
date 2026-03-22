@@ -2,8 +2,8 @@ export default class ValidatorNumber {
     constructor(options) {
         this.rules = []
         this.errors = []
-        this.allowInfinity = options?.allowInfinity ?? true
-        this.allowNaN = options?.allowNaN ?? true
+        this.allowInfinity = options?.allowInfinity ?? false
+        this.allowNaN = options?.allowNaN ?? false
         this.allowUnsafe = options?.allowUnsafe ?? true
         this.isRequired = false
         this.isNullable = false
@@ -77,7 +77,7 @@ export default class ValidatorNumber {
         })
 
         this.rules.push((value, errors) => {
-            if (!this.allowInfinity && !Number.isFinite(value)) {
+            if (!this.allowInfinity && !Number.isNaN(value) && !Number.isFinite(value)) {
                 errors.push({ field: null, code: 'NUMBER_INFINITY_NOT_ALLOWED', message: 'Infinity and -Infinity are not allowed.' })
             }
         })

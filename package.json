@@ -1,11 +1,21 @@
 {
     "name": "imagic-validator",
-    "version": "3.0.10",
+    "version": "3.1.0",
     "description": "Easy validator",
-    "main": "src/index.js",
     "type": "module",
+    "exports": {
+        ".": "./src/index.js",
+        "./package.json": "./package.json"
+    },
+    "files": ["src", "README.md", "LICENSE"],
+    "sideEffects": false,
     "scripts": {
-        "test": "mocha"
+        "test": "node --test ./tests/**/*.test.js",
+        "lint": "eslint src",
+        "lint:fix": "eslint src --fix"
+    },
+    "engines": {
+        "node": ">=24"
     },
     "repository": {
         "type": "git",
@@ -24,7 +34,15 @@
     },
     "homepage": "https://github.com/iMagicKey/validator#readme",
     "devDependencies": {
-        "chai": "^5.1.1",
-        "mocha": "^10.6.0"
+        "@eslint/js": "latest",
+        "chai": "latest",
+        "eslint": "latest",
+        "eslint-config-prettier": "latest",
+        "eslint-plugin-import": "latest",
+        "eslint-plugin-n": "latest",
+        "eslint-plugin-prettier": "latest",
+        "eslint-plugin-promise": "latest",
+        "globals": "latest",
+        "prettier": "latest"
     }
 }

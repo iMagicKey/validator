@@ -70,6 +70,7 @@ export default class ValidatorString {
         this.rules.push((value, errors) => {
             if (!allowedValues.includes(value)) {
                 errors.push({
+                    field: null,
                     code: 'STRING_IN',
                     message: `Value must be one of ${JSON.stringify(allowedValues)}. Invalid values: ${JSON.stringify(value)}.`,
                 })
@@ -100,11 +101,28 @@ export default class ValidatorString {
     }
 
     ip({ v4 = true, v6 = true } = {}) {
-        this.rules.push((value, errors) => {
-            const ipv4Regex =
-                /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
-            const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4})$/
+        const oct = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
+        const ipv4Regex = new RegExp(`^${oct}\\.${oct}\\.${oct}\\.${oct}$`)
 
+        const h = '[0-9a-fA-F]{1,4}'
+        const ipv4 = `((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9])`
+        const ipv6Parts = [
+            `(${h}:){7}${h}`,
+            `(${h}:){1,7}:`,
+            `(${h}:){1,6}:${h}`,
+            `(${h}:){1,5}(:${h}){1,2}`,
+            `(${h}:){1,4}(:${h}){1,3}`,
+            `(${h}:){1,3}(:${h}){1,4}`,
+            `(${h}:){1,2}(:${h}){1,5}`,
+            `${h}:((:${h}){1,6})`,
+            `:((:${h}){1,7}|:)`,
+            `fe80:(:${h.replace('{1,4}', '{0,4}')}){0,4}%[0-9a-zA-Z]{1,}`,
+            `::(ffff(:0{1,4})?:)?${ipv4}`,
+            `(${h}:){1,4}:${ipv4}`,
+        ]
+        const ipv6Regex = new RegExp(`^(${ipv6Parts.join('|')})$`)
+
+        this.rules.push((value, errors) => {
             const isIPv4 = ipv4Regex.test(value)
             const isIPv6 = ipv6Regex.test(value)
 

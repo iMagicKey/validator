@@ -1,9 +1,10 @@
+import { describe, it } from 'node:test'
 import { expect } from 'chai'
-import IMV from '../src/index.js'
+import Validator from '../src/index.js'
 
-describe('Array', () => {
+describe('ValidatorArray', () => {
     it('should validate required array correctly', () => {
-        const schema = IMV.array().required()
+        const schema = Validator.array().required()
         expect(schema.validate([1, 2, 3])).to.be.true
         expect(schema.errors).to.be.empty
 
@@ -12,7 +13,7 @@ describe('Array', () => {
     })
 
     it('should validate unique elements in array correctly', () => {
-        const schema = IMV.array().unique()
+        const schema = Validator.array().unique()
 
         expect(schema.validate([1, 2, 3])).to.be.true
         expect(schema.errors).to.be.empty
@@ -22,7 +23,7 @@ describe('Array', () => {
     })
 
     it('should validate elements in allowed values correctly', () => {
-        const schema = IMV.array().in([1, 2, 3])
+        const schema = Validator.array().in([1, 2, 3])
 
         expect(schema.validate([1, 2])).to.be.true
         expect(schema.errors).to.be.empty
@@ -32,7 +33,7 @@ describe('Array', () => {
     })
 
     it('should validate minimum array length correctly', () => {
-        const schema = IMV.array().min(2)
+        const schema = Validator.array().min(2)
 
         expect(schema.validate([1, 2])).to.be.true
         expect(schema.errors).to.be.empty
@@ -42,14 +43,14 @@ describe('Array', () => {
     })
 
     it('should skip array rules for null when nullable is allowed', () => {
-        const schema = IMV.array().nullable().min(1)
+        const schema = Validator.array().nullable().min(1)
 
         expect(schema.validate(null)).to.be.true
         expect(schema.errors).to.be.empty
     })
 
     it('should validate maximum array length correctly', () => {
-        const schema = IMV.array().max(2)
+        const schema = Validator.array().max(2)
 
         expect(schema.validate([1, 2])).to.be.true
         expect(schema.errors).to.be.empty
@@ -59,7 +60,7 @@ describe('Array', () => {
     })
 
     it('should validate exact array length correctly', () => {
-        const schema = IMV.array().length(2)
+        const schema = Validator.array().length(2)
 
         expect(schema.validate([1, 2])).to.be.true
         expect(schema.errors).to.be.empty
@@ -69,21 +70,21 @@ describe('Array', () => {
     })
 
     it('should handle non-array values when required', () => {
-        const schema = IMV.array().required()
+        const schema = Validator.array().required()
 
         expect(schema.validate('not an array')).to.be.false
         expect(schema.errors.some((error) => error.code === 'ARRAY_TYPE_ERROR')).to.be.true
     })
 
     it('should handle optional arrays correctly', () => {
-        const schema = IMV.array()
+        const schema = Validator.array()
 
         expect(schema.validate(undefined)).to.be.true
         expect(schema.errors).to.be.empty
     })
 
     it('should validate array custom validator correctly', () => {
-        const schema = IMV.array().fn((value, errors) => {
+        const schema = Validator.array().fn((value, errors) => {
             if (value.includes(3)) {
                 errors.push({ field: null, code: 'CUSTOM_ERROR', message: 'Custom message' })
             }
@@ -97,7 +98,7 @@ describe('Array', () => {
     })
 
     it('should validate array custom validator error', () => {
-        const schema = IMV.array().fn(() => {
+        const schema = Validator.array().fn(() => {
             throw Error()
         })
         expect(schema.validate([1, 2, 3])).to.be.false
@@ -105,7 +106,7 @@ describe('Array', () => {
     })
 
     it('should validate nested number items', () => {
-        const schema = IMV.array(IMV.number().min(5).max(10)).required()
+        const schema = Validator.array(Validator.number({ allowNaN: true, allowInfinity: true }).min(5).max(10)).required()
 
         expect(schema.validate([5, 6, 7])).to.be.true
         expect(schema.errors).to.be.empty
@@ -116,7 +117,7 @@ describe('Array', () => {
     })
 
     it('should validate nested string items', () => {
-        const schema = IMV.array(IMV.string().min(2).max(5)).required()
+        const schema = Validator.array(Validator.string().min(2).max(5)).required()
 
         expect(schema.validate(['hi', 'hello'])).to.be.true
         expect(schema.errors).to.be.empty
@@ -127,10 +128,10 @@ describe('Array', () => {
     })
 
     it('should validate nested object items', () => {
-        const schema = IMV.array(
-            IMV.object({
-                name: IMV.string().required().min(1),
-                age: IMV.number().min(18),
+        const schema = Validator.array(
+            Validator.object({
+                name: Validator.string().required().min(1),
+                age: Validator.number({ allowNaN: true, allowInfinity: true }).min(18),
             })
         ).required()
 
@@ -150,14 +151,20 @@ describe('Array', () => {
     })
 
     it('should accept null if nullable is allowed', () => {
-        const schema = IMV.array().nullable()
+        const schema = Validator.array().nullable()
         expect(schema.validate(null)).to.be.true
         expect(schema.errors).to.be.empty
     })
 
     it('should reject null if nullable is not allowed', () => {
-        const schema = IMV.array()
+        const schema = Validator.array()
         expect(schema.validate(null)).to.be.false
         expect(schema.errors.some((e) => e.code === 'ARRAY_TYPE_ERROR')).to.be.true
+    })
+
+    it('should validate empty array', () => {
+        const schema = Validator.array()
+        expect(schema.validate([])).to.be.true
+        expect(schema.errors).to.be.empty
     })
 })
