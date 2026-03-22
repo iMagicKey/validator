@@ -167,4 +167,12 @@ describe('ValidatorArray', () => {
         expect(schema.validate([])).to.be.true
         expect(schema.errors).to.be.empty
     })
+
+    it('ARRAY_IN error must include field: null', () => {
+        const schema = Validator.array().in([[1, 2]])
+        expect(schema.validate([[3]])).to.be.false
+        const err = schema.errors.find((e) => e.code === 'ARRAY_IN')
+        expect(err).to.exist
+        expect(err).to.have.property('field', null)
+    })
 })

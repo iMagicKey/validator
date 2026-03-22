@@ -43,6 +43,7 @@ export default class ValidatorArray {
             const invalidValues = value.filter((item) => !allowedValues.includes(item))
             if (invalidValues.length > 0) {
                 errors.push({
+                    field: null,
                     code: 'ARRAY_IN',
                     message: `Array elements must be one of ${JSON.stringify(allowedValues)}. Invalid values: ${JSON.stringify(invalidValues)}.`,
                 })

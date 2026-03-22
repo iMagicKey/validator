@@ -142,6 +142,23 @@ describe('ValidatorObject', () => {
         expect(schema.errors).to.be.empty
     })
 
+    it('child validator errors are not mutated after parent validate call', () => {
+        const childValidator = Validator.string().required().min(3)
+        const parentValidator = Validator.object({ name: childValidator })
+
+        parentValidator.validate({ name: 'x' })
+        // After parent validation, child errors should still have field: null (not 'name')
+        const childErr = childValidator.errors.find((e) => e.code === 'STRING_MIN_LENGTH')
+        expect(childErr).to.exist
+        expect(childErr).to.have.property('field', null)
+
+        // Validate child directly — should still produce field: null
+        childValidator.validate('ab')
+        const directErr = childValidator.errors.find((e) => e.code === 'STRING_MIN_LENGTH')
+        expect(directErr).to.exist
+        expect(directErr).to.have.property('field', null)
+    })
+
     it('should validate complex nested object', () => {
         const schema = Validator.object({
             user: Validator.object({

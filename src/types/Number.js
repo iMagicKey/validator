@@ -55,6 +55,7 @@ export default class ValidatorNumber {
         this.rules.push((value, errors) => {
             if (!allowedValues.includes(value)) {
                 errors.push({
+                    field: null,
                     code: 'NUMBER_IN',
                     message: `Number must be one of ${JSON.stringify(allowedValues)}. Invalid values: ${JSON.stringify(value)}.`,
                 })

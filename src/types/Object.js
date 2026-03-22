@@ -95,10 +95,10 @@ export default class ValidatorObject {
 
                 if (!fieldValidateResult) {
                     this.errors = this.errors.concat(
-                        fieldValidator.errors.map((val) => {
-                            val.field = val.field ? [field, val.field].join('.') : field
-                            return val
-                        })
+                        fieldValidator.errors.map((val) => ({
+                            ...val,
+                            field: val.field ? [field, val.field].join('.') : field,
+                        }))
                     )
                 }
             }

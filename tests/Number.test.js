@@ -157,4 +157,12 @@ describe('ValidatorNumber', () => {
         expect(schema.validate(5)).to.be.false
         expect(schema.errors.some((error) => error.code === 'NUMBER_CUSTOM_VALIDATION')).to.be.true
     })
+
+    it('NUMBER_IN error must include field: null', () => {
+        const schema = Validator.number().in([1, 2])
+        expect(schema.validate(3)).to.be.false
+        const err = schema.errors.find((e) => e.code === 'NUMBER_IN')
+        expect(err).to.exist
+        expect(err).to.have.property('field', null)
+    })
 })
